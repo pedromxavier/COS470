@@ -1,0 +1,76 @@
+\quest*{}% 1
+
+\begin{answer}
+    A comunicação entra processos pode se dar através do uso de memória compartilhada ou de algum mecanismo de troca de mensagens. Dentro destas duas categorias existe ainda um monte de técnicas diferenetes.
+    
+    Em uma situação do uso de memória compartilhada, uma região da memória poderá ser acessada pelos processos que a compartilham através das operações usuais de leitura e escrita em seus endereços. Antigamente, isso costumava ser feito utilizando arquivos. Alguns sistemas operacionais implementavam um tipo especial de arquivo para este propósito.
+
+    A troca de mensagens pode ser dar de maneira ainda mais diversa, desde a simples troca de sinais, passando pelo uso de \textit{traps} do sistema operacional, considerando os \textit{Pipes} e até mesmo os \textit{Sockets}. O que estes métodos apresentam em comum é o papel do sistema operacional como intermediário na comunicação.
+
+    Utilizar memória compartilhada entre processos, em geral, torna a execução mais rápida do que a maioria dos meios de troca de mensagens, uma vez que chamadas ao sistema operacional não são necessárias. Esta abordagem, no entanto, incorre em problemas de escalabilidade além de não ser aplicável a um contexto de redes. Uma vantagem da troca de mensagens é a possibilidade de se construir programas sobre este paradigma que operam remotamente. A depender da técnica utilizada, pode-se encara maior ou menor dificuldade de implementação. Se a exigência não for tremenda, o simples uso de sinais pode ser suficiente para estabelecer a comnuicação desejada.
+
+\end{answer}
+
+\quest*{}% 2
+
+\begin{answer}
+    \begin{center}
+    \begin{tabular}{| l | p{5cm} | p{5cm} |}
+        \hline
+        ~ & P2 (\texttt{read}) bloqueante & P2 (read) não-bloqueante\\
+        \hline
+        P1 (\texttt{write}) bloqueante  & %
+        Quando ambos são bloqueantes, a comunicação se dá de maneira sincronizada, intercalando chamadas \texttt{read} e \texttt{write}. P1 sempre aguardará que o conteúdo do \textit{Pipe} seja lido antes de escrever. P2 sempre irá esperar até que alguma informação seja escrita no \textit{Pipe} antes de realizar a leitura.%
+        & %
+        Quando somente a leitura é não-bloqueante, pode ser que P2 leia repetidas vezes antes de uma troca de contexto, levando à situação em que o \textit{Pipe} encontra-se vazio. Nesse caso, a depender da implementação, a chamada \texttt{read} terá valor de retorno indicativo da falha na leitura e, portanto, é de responsabilidade do programador lidar com este cenário.
+        \\%
+        \hline
+        P1 (\texttt{write}) não-bloqueante & %
+        A escrita não-bloqueante permite que a operação se repita sucessivas vezes antes de uma troca de contexto. Com isso, a capacidade máxima do \textit{Pipe}, que depende da implementação, pode ser atingida. Isso permite que a atomicidade da escrita seja violada e parte da mensagem seja entregue de maneira fragmentada.
+        & %
+        Quando ambas leitura e escrita se dão de maneira não-bloqueante, teremos que enfrentar os cenários descritos nos dois casos.
+        \\ %
+        \hline
+    \end{tabular}
+    \end{center}
+\end{answer}
+
+\quest*{}% 3
+
+\begin{answer}
+    Criar um sistema \textit{multi-threaded} é imediatamente vantajoso do ponto de vista dos recursos necessários, quando comparado a um sistema \textit{multi-processed}. Neste último, é necessário criar um novo espaço de memória com todas as informações relativas ao processo para cada linha de execução necessária. Múltiplas \textit{threads} dentro de um mesmo processo vão utilizar o mesmo espaço de endereçamento. Isso nos leva a uma outra vantagem do uso de \textit{threads} em vez de processos: a comunicação. \textit{Threads} podem simplesmente se comunicar através da memória que compartilham, enquanto processos distintos dependem de outros mecanismos como Sinais, \textit{Sockets} e \textit{Pipes}.
+\end{answer}
+
+\quest*{}% 4
+
+\begin{answer}
+    Em geral, \textit{user-level threads} não dispõem dos recursos de paralelismo que múltiplos núcleos de processamento podem oferecer. O Sistema Operacional não é capaz de fazer distinção entre as \textit{threads} e, portanto, deve designá-las ao mesmo núcleo de maneira sequencial, mesmo que alternada.
+    
+    No entanto, se considerarmos um computador onde são executados diversos processos simultâneamente, o fato de ser multi-processado pode garantir uma menor disputa entre o processo do sistema em questão e os demais, fazendo com que ele permaneça por mais tempo em execução. 
+\end{answer}
+
+\quest*{}% 5
+
+\begin{answer}
+    Uma \textit{condição de corrida} é a situação onde o comportamento de um programa pode ser influenciado pela execução concorrente de outros programas com os quais compartilha recursos. É muito comum que \textit{condições de corrida} causem incosistência nos dados do programa, o que pode gerar decisões equivocadas guiadas por condicionais, \textit{deadlocks}, perda definitiva de informações em bancos de dados dentre outros problemas.
+
+    \begin{clang}
+int n;
+...
+void f() {
+    while (1) n = n + 1;
+}
+    \end{clang}
+    No código em questão, um simples exemplo ilustrativo, vamos supor que a função \texttt{f} é executada por diferentes \textit{threads} e que o incremento é realizado de maneira fragmentada, não-atômica. Pode ser que ocorra uma interrupção no momento em que uma delas acabou de acessar do valor da variável \texttt{n}. Esse valor foi, portanto, salvo em um registrador. Então, outra \textit{thread} passa a incrementar repetidamente o valor da variável. Quando retorna a \textit{thread} em questão, ela utiliza o valor inconsistente do registrador para atualizar a variável, desconsiderando uma série de alterações anteriores.
+
+\end{answer}
+
+\quest*{}% 6
+
+\begin{answer}
+    Se uma das \textit{threads} fizer uma chamada à função \texttt{acquire} num momento próximo à troca da linha de execução, ela pode acabar declarando interesse em entrar na região crítica, ou seja, executando a instrução
+    
+    \texttt{lock->interested[this\_thread] = 1}
+
+    e, em seguida, saindo da CPU. Uma outra \textit{thread} que em sua vez de executar faça uma chamada à função \texttt{acquire} estará cometendo um erro terrível: irá declarar interesse em adentrar a região crítica e logo entrará em espera, pois já existe outra \textit{thread} interessada. Terminado o seu tempo de execução, a \textit{thread} anterior, ao retornar à CPU, deparar-se-à com o interesse da outra \textit{thread}. Resultado: ambas para sempre esperando que a outra não esteja mais interessada.
+\end{answer}

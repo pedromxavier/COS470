@@ -1,0 +1,54 @@
+\quest*{}% 7
+
+\begin{answer}
+Podemos contruir locks da seguinte forma:
+\begin{clang}
+void swap(bool *a, *b) {
+    bool temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+struct lock {
+    bool x = false;
+}
+
+void acquire(lock) {
+    bool x = true;
+    while (x) swap(&lock.x, &x);
+}
+
+void release(lock) {
+    lock->x = false;
+}
+\end{clang}
+Quando uma \textit{thread} realizar a chamada \texttt{acquire}, ela vai executar as linhas 12 e 13, substituindo o valor armazenado na estrutura \texttt{lock} pelo valor de \texttt{x}, que pertence à \textit{thread}. Como este valor era inicialmente \texttt{false}, a troca permite que a \textit{thread} saia da espera e adentre a região crítica. Outra \textit{thread} que tome a mesma atitude irá encontrar o valor de \textit{Lock} verdadeiro e não poderá seguir adiante. Quando a \textit{thread} original fizer uma chamada à função \texttt{release}, o valor da \textit{Lock} permitirá que outra \textit{thread} passe o valor falso para sua variável de condição do loop.
+
+Mesmo que ocorra uma troca de contexto após a chamada ao \texttt{swap} e antes da verificação de condição do loop, o valor da \textit{Lock} não poderá ser lido como falso por mais de uma \textit{thread}, evitando assim uma condição de corrida.
+\end{answer}
+
+\quest*{}% 8
+
+\begin{answer}
+    No código apresentado, podemos chamar $R_1$ a região crítica encapsulada pelo semáforo $s_1$ e $R_2$ aquela determinada pelo semáforo $s_2$. Como os semáforos são binários teremos, no máximo, uma \textit{thread} dentro de uma determinada região. Percebe-se que $R_2 \subset R_1$, ou seja, para executar código em $R_2$, uma \textit{thread} necessariamente deve estar em $R_1$. Como o acesso ao código em $R_1$ é sempre exclusivo à uma única linha de execução, o código de $R_2$ também será. Independente do número de \textit{threads}, a saída poderá ser descrita pela expressão regular \texttt{(ab)*}.
+\end{answer}
+
+\quest*{}% 9
+
+\begin{answer}
+    Realizar a chamada \texttt{wait(mutex)} antes da chamada \texttt{wait(buffer)} pode levar a um cenário onde um produtor fica na região de exclusão mútua, solitário, aguardando a liberação de um \textit{buffer}. Os consumidores não conseguirão entrar na região crítica, tampouco sair. Dessa maneira, nenhum \textit{buffer} será liberado e o sistema permanecerá congelado indeterminadamente.
+\end{answer}
+
+\quest*{}% 10
+
+\begin{answer}
+    A chamada \texttt{signal} associada ao semáforo serve para incrementar o valor do semáforo permitindo que, caso o valor se torne positivo, alguma \textit{thread} que tenha realizado a chamada \texttt{wait} possa enfim decrementar o valor do mesmo.
+    
+    A semântica da chamada no caso dos monitores, por sua vez, é responsável por alterar o estado das \textit{threads} que chamaram \textit{wait} para \textit{ready}, a depender da variável de condição associada.
+\end{answer}
+
+\quest*{}% 11
+
+\begin{answer}
+    
+\end{answer}

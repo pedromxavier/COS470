@@ -1,3 +1,25 @@
 {
-    "restructuredtext.languageServer.disabled": true
+    "restructuredtext.languageServer.disabled": true,
+    "files.associations": {
+        "*.COBOL*": "cobol",
+        "*.COB*": "cobol",
+        "*.COBCOPY*": "cobol",
+        "*.COPYBOOK*": "cobol",
+        "*.COPY*": "cobol",
+        "*.PL1*": "pl1",
+        "*.PLI*": "pl1",
+        "*.INC*": "pl1",
+        "*.INCLUDE*": "pl1",
+        "*.JCL*": "jcl",
+        "*.ASM*": "hlasm",
+        "*.ASSEMBLE*": "hlasm",
+        "*.HLASM*": "hlasm",
+        "*.HLA*": "hlasm",
+        "*.mkd": "log",
+        "locallib.h": "c",
+        "socket.h": "c",
+        "types.h": "c",
+        "stdio.h": "c",
+        "stdlib.h": "c"
+    }
 }
